@@ -63,16 +63,16 @@ export const useCheapestFirms = () => {
         const { data, error } = await supabase
           .from('prop_firms')
           .select('*')
-          .order('starting_fee', { ascending: true })
+          .order('price', { ascending: true })
           .limit(10);
 
         if (error || !data || data.length === 0) {
           console.log('Supabase error or empty in cheapest firms, using local data:', error);
-          // Use local data sorted by starting_fee if available, else by price
+          // Use local data sorted by price
           const sortedLocalData = [...propFirmsData]
             .sort((a, b) => {
-              const aFee = a.starting_fee ?? a.price ?? Number.MAX_SAFE_INTEGER;
-              const bFee = b.starting_fee ?? b.price ?? Number.MAX_SAFE_INTEGER;
+              const aFee = a.price ?? Number.MAX_SAFE_INTEGER;
+              const bFee = b.price ?? Number.MAX_SAFE_INTEGER;
               return aFee - bFee;
             })
             .slice(0, 10);
@@ -86,8 +86,8 @@ export const useCheapestFirms = () => {
         console.log('Error fetching cheapest firms from Supabase, using local data:', err);
         const sortedLocalData = [...propFirmsData]
           .sort((a, b) => {
-            const aFee = a.starting_fee ?? a.price ?? Number.MAX_SAFE_INTEGER;
-            const bFee = b.starting_fee ?? b.price ?? Number.MAX_SAFE_INTEGER;
+            const aFee = a.price ?? Number.MAX_SAFE_INTEGER;
+            const bFee = b.price ?? Number.MAX_SAFE_INTEGER;
             return aFee - bFee;
           })
           .slice(0, 10);
@@ -199,7 +199,7 @@ export const getCheapestFirms = async (limit: number = 10): Promise<PropFirm[]> 
   const { data, error } = await supabase
     .from('prop_firms')
     .select('*')
-    .order('starting_fee', { ascending: true })
+    .order('price', { ascending: true })
     .limit(limit);
 
   if (error) throw error;

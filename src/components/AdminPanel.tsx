@@ -40,15 +40,12 @@ const AdminPanel = () => {
     try {
       const result = await addFirm(firmData);
       console.log('AdminPanel: Add result:', result);
-      
       if (result.success) {
         setOperationStatus({ 
           type: 'success', 
           message: `Successfully added "${firmData.name}"` 
         });
-        setTimeout(async () => {
-          await refetch();
-        }, 500);
+        await refetch();
       } else {
         setOperationStatus({ 
           type: 'error', 
