@@ -56,6 +56,7 @@ export const useCheapestFirms = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
   useEffect(() => {
     const fetchCheapestFirms = async () => {
       try {
@@ -65,32 +66,37 @@ export const useCheapestFirms = () => {
           .order('starting_fee', { ascending: true })
           .limit(10);
 
-        if (error) {
-          console.log('Supabase error in cheapest firms, using local data:', error);
-          // Use local data sorted by price
-          const sortedLocalData = [...propFirmsData].sort((a, b) => a.price - b.price).slice(0, 10);
+        if (error || !data || data.length === 0) {
+          console.log('Supabase error or empty in cheapest firms, using local data:', error);
+          // Use local data sorted by starting_fee if available, else by price
+          const sortedLocalData = [...propFirmsData]
+            .sort((a, b) => {
+              const aFee = a.starting_fee ?? a.price ?? Number.MAX_SAFE_INTEGER;
+              const bFee = b.starting_fee ?? b.price ?? Number.MAX_SAFE_INTEGER;
+              return aFee - bFee;
+            })
+            .slice(0, 10);
           setPropFirms(sortedLocalData);
           setError(null);
           return;
         }
 
-        if (!data || data.length === 0) {
-          console.log('Supabase returned empty data for cheapest firms, using local data');
-          const sortedLocalData = [...propFirmsData].sort((a, b) => a.price - b.price).slice(0, 10);
-          setPropFirms(sortedLocalData);
-        } else {
-          setPropFirms(data);
-        }
+        setPropFirms(data);
       } catch (err) {
         console.log('Error fetching cheapest firms from Supabase, using local data:', err);
-        const sortedLocalData = [...propFirmsData].sort((a, b) => a.price - b.price).slice(0, 10);
+        const sortedLocalData = [...propFirmsData]
+          .sort((a, b) => {
+            const aFee = a.starting_fee ?? a.price ?? Number.MAX_SAFE_INTEGER;
+            const bFee = b.starting_fee ?? b.price ?? Number.MAX_SAFE_INTEGER;
+            return aFee - bFee;
+          })
+          .slice(0, 10);
         setPropFirms(sortedLocalData);
         setError(null);
       } finally {
         setLoading(false);
       }
     };
-
     fetchCheapestFirms();
   }, []);
 
@@ -111,32 +117,37 @@ export const useTopRatedFirms = () => {
           .order('review_score', { ascending: false })
           .limit(5);
 
-        if (error) {
-          console.log('Supabase error in top rated firms, using local data:', error);
+        if (error || !data || data.length === 0) {
+          console.log('Supabase error or empty in top rated firms, using local data:', error);
           // Use local data sorted by review score
-          const sortedLocalData = [...propFirmsData].sort((a, b) => b.review_score - a.review_score).slice(0, 5);
+          const sortedLocalData = [...propFirmsData]
+            .sort((a, b) => {
+              const aScore = a.review_score ?? 0;
+              const bScore = b.review_score ?? 0;
+              return bScore - aScore;
+            })
+            .slice(0, 5);
           setPropFirms(sortedLocalData);
           setError(null);
           return;
         }
 
-        if (!data || data.length === 0) {
-          console.log('Supabase returned empty data for top rated firms, using local data');
-          const sortedLocalData = [...propFirmsData].sort((a, b) => b.review_score - a.review_score).slice(0, 5);
-          setPropFirms(sortedLocalData);
-        } else {
-          setPropFirms(data);
-        }
+        setPropFirms(data);
       } catch (err) {
         console.log('Error fetching top rated firms from Supabase, using local data:', err);
-        const sortedLocalData = [...propFirmsData].sort((a, b) => b.review_score - a.review_score).slice(0, 5);
+        const sortedLocalData = [...propFirmsData]
+          .sort((a, b) => {
+            const aScore = a.review_score ?? 0;
+            const bScore = b.review_score ?? 0;
+            return bScore - aScore;
+          })
+          .slice(0, 5);
         setPropFirms(sortedLocalData);
         setError(null);
       } finally {
         setLoading(false);
       }
     };
-
     fetchTopRatedFirms();
   }, []);
 
